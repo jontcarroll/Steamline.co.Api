@@ -1,0 +1,285 @@
+{
+    "type": "form",
+    "name": "root",
+    "form": {
+        "type": "object",
+        "fields": {
+            "sections": {
+                "type": "array",
+                "values": {
+                    "type": "section"
+                }
+            }
+        }
+    },
+    "section": {
+        "type": "object",
+        "fields": {
+            "name": {
+                "type": "string"
+            },
+            "controls": {
+                "type": "array",
+                "values": {
+                    "type": "derived",
+                    "typePrefix": "ctrl::",
+                    "deriveTypeFromField": "type",
+                    "validTypes": ["static", "text", "choice", "date", "file", "asset"]
+                }
+            }
+        }
+    },
+    "ctrl::static": {
+        "type": "object",
+        "fields": {
+            "type": {
+                "type": "string"
+            },
+            "subType": {
+                "type": "enum",
+                "values": {
+                    "type": "string",
+                    "possibleValues": [
+                        "text"
+                    ]
+                }
+            },
+            "label": {
+                "type": "string"
+            }
+        }
+    },
+    "ctrl::text": {
+        "type": "object",
+        "fields": {
+            "type": {
+                "type": "string"
+            },
+            "subType": {
+                "type": "enum",
+                "values": {
+                    "type": "string",
+                    "possibleValues": [
+                        "single",
+                        "area"
+                    ]
+                }
+            },
+            "label": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string",
+                "optional": true
+            },
+            "placeholderText": {
+                "type": "string",
+                "optional": true
+            },
+            "prePropulateFrom": {
+                "type": "object",
+                "optional": true,
+                "fields": {
+                    "source": {
+                        "type": "enum",
+                        "values": {
+                            "type": "string",
+                            "possibleValues": [
+                                "requestor_name",
+                                "requestor_email"
+                            ]
+                        }
+                    }
+                }
+            },
+            "required": {
+                "type": "boolean"
+            },
+            "preview": {
+                "type": "boolean"
+            },
+            "index": {
+                "type": "boolean"
+            }
+        }
+    },
+    "ctrl::date": {
+        "type": "object",
+        "fields": {
+            "type": {
+                "type": "string"
+            },
+            "subType": {
+                "type": "enum",
+                "values": {
+                    "type": "string",
+                    "possibleValues": [
+                        "single",
+                        "range"
+                    ]
+                }
+            },
+            "label": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string",
+                "optional": true
+            },
+            "required": {
+                "type": "boolean"
+            }
+        },
+        "preview": {
+            "type": "boolean"
+        },
+        "index": {
+            "type": "boolean"
+        }
+    },
+    "ctrl::asset": {
+        "type": "object",
+        "fields": {
+            "type": {
+                "type": "string"
+            },
+            "subType": {
+                "type": "enum",
+                "values": {
+                    "type": "string",
+                    "possibleValues": [
+                        "multiple"
+                    ]
+                }
+            },
+            "label": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string",
+                "optional": true
+            },
+            "assetTypeId": {
+                "type": "integer"
+            },
+            "required": {
+                "type": "boolean"
+            },
+            "prepopulateFromWorkflow": {
+                "type": "boolean"
+            }
+        }
+    },
+    "ctrl::file": {
+        "type": "object",
+        "fields": {
+            "type": {
+                "type": "string"
+            },
+            "subType": {
+                "type": "enum",
+                "values": {
+                    "type": "string",
+                    "possibleValues": [
+                        "single"
+                    ]
+                }
+            },
+            "label": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string",
+                "optional": true
+            },
+            "required": {
+                "type": "boolean"
+            }
+        }
+    },
+    "ctrl::choice": {
+        "type": "object",
+        "fields": {
+            "type": {
+                "type": "string"
+            },
+            "subType": {
+                "type": "enum",
+                "values": {
+                    "type": "string",
+                    "possibleValues": [
+                        "single",
+                        "multiple",
+                        "checkbox",
+                        "radio"
+                    ]
+                }
+            },
+            "label": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string",
+                "optional": true
+            },
+            "choices": {
+                "type": "array",
+                "optional": true,
+                "values": {
+                    "type": "item",
+                    "typePrefix": "choice::"
+                }
+            },
+            "prePopulateFrom": {
+                "type": "derived",
+                "typePrefix": "chds::",
+                "deriveTypeFromField": "source",
+                "validTypes": [
+                    "tag"
+                ],
+                "optional": true
+            },
+            "required": {
+                "type": "boolean"
+            },
+            "preview": {
+                "type": "boolean"
+            },
+            "index": {
+                "type": "boolean"
+            }
+        }
+    },
+    "choice::item": {
+        "type": "object",
+        "fields": {
+            "name": {
+                "type": "string"
+            },
+            "instructionalText": {
+                "type": "string",
+                "optional": true
+            },
+            "default": {
+                "type": "boolean"
+            }
+        }
+    },
+    "chds::tag": {
+        "type": "object",
+        "fields": {
+            "source": {
+                "type": "string"
+             },
+            "tagCategoryId": {
+                "type": "integer"
+            },
+            "filtered": {
+                "type": "boolean"
+            },
+            "preSelected": {
+                "type": "boolean"
+            }
+        }
+    }
+}

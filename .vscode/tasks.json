@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Steamline.co.csproj"
+                "${workspaceFolder}/Steamline.co.Api/Steamline.co.Api.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
