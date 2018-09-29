@@ -12,7 +12,7 @@ using Steamline.co.Api.V1.Models;
 namespace Steamline.co.Api.V1.Controllers
 {
     [ApiVersion("1.0")]
-    [Route("auth/v{version:apiVersion}/gamefinder")]
+    [Route("api/v{version:apiVersion}/gamefinder")]
     public class GameFinder : Controller
     {
         IGameFinderService _gameFinderService;
@@ -23,6 +23,8 @@ namespace Steamline.co.Api.V1.Controllers
         [HttpGet("{groupCode}/{url}")]
         public ServiceActionResult GetGamesFromProfileUrl(string groupCode, string url)
         {
+            //Need to handle encoding from client, for now just doing this
+            url = $"https://steamcommunity.com/profiles/{url}";
             var result = _gameFinderService.GetGamesFromProfileUrl(url, groupCode);
             return ServiceActionResultFactory.Create(result);
         }

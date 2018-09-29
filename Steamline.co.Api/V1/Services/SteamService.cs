@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Steamline.co.Api.V1.Config;
 using Steamline.co.Api.V1.Models;
+using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Interfaces;
 
 namespace Steamline.co.Api.V1.Services
@@ -101,7 +102,7 @@ namespace Steamline.co.Api.V1.Services
                 string jsonResponse = reader.ReadToEnd();
                 return JsonConvert.DeserializeObject<T>(jsonResponse);
             }
-            catch
+            catch(Exception ex)
             {
                 return null;
             }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Steamline.co.Api.V1.Models;
+using Steamline.co.Api.V1.Models.SteamApi;
 
 namespace Steamline.co.Api.V1.Services.Interfaces
 {

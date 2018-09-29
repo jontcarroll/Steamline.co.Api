@@ -1,7 +1,7 @@
 using System.IO;
 using Steamline.co.Api.V1.Services.Interfaces;
 
-namespace Steamline.co.Api.V1.Services
+namespace Steamline.co.Api.V1.Services.Utils
 {
     public static class ServiceResultFactory
     {
