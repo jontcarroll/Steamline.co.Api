@@ -104,7 +104,7 @@ namespace Steamline.co.Api.V1.Services
             }
             catch(Exception ex)
             {
-                return null;
+                throw ex;
             }
         }
 
