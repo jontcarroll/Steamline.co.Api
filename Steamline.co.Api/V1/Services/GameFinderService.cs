@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Steamline.co.Api.V1.Models.GameFinder;
 using System;
 using Steamline.co.Api.V1.Services.Utils;
+using System.Threading.Tasks;
 
 namespace Steamline.co.Api.V1.Services
 {
@@ -20,12 +21,29 @@ namespace Steamline.co.Api.V1.Services
             _steamService = steamService;
         }
 
-        public IServiceResult<List<GameModel>, ApiErrorModel> GetGamesFromProfileUrl(string url, string groupCode)
+        public async Task<IServiceResult<GameModel, ApiErrorModel>> GetGameDetails(long appId)
+        {
+
+            var apiResult = _steamService.GetGameDetails(appId);
+
+            if (apiResult == null) 
+            {
+                throw new Exception("");
+            }
+
+            var retVal = new GameModel() {
+
+            };
+
+            return ServiceResultFactory.Ok<GameModel, ApiErrorModel>(retVal);
+        }
+
+        public async Task<IServiceResult<List<GameModel>, ApiErrorModel>> GetGamesFromProfileUrl(string url, string groupCode)
         {
             var steamId = string.Empty;
             try
             {
-                steamId = _steamService.Get64BitSteamId(url);
+                steamId = await _steamService.Get64BitSteamId(url);
                 _logger.LogDebug($"SteamID for {url}: {steamId}");
             }
             catch(Exception ex)
@@ -40,7 +58,7 @@ namespace Steamline.co.Api.V1.Services
                 return ServiceResultFactory.Error<List<GameModel>, ApiErrorModel>(em);
             }
 
-            var games = _steamService.GetGamesFromProfile(steamId);
+            var games = await _steamService.GetGamesFromProfile(steamId);
             //Example of an error that is unexpected and should not be displayed in the browser
             if (games == null)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -24,7 +25,7 @@ namespace Steamline.co.Api.V1.Services
             _config = config.Value;
         }
 
-        public string Get64BitSteamId(string profileUrl)
+        public async Task<string> Get64BitSteamId(string profileUrl)
         {
             var uri = new Uri(profileUrl);
 
@@ -38,7 +39,7 @@ namespace Steamline.co.Api.V1.Services
             if (uri.Segments.Skip(1).FirstOrDefault()?.ToLower().Contains("profiles") ?? false)
                 return profileName;
 
-            var profileResponse = GetResponse<VanityProfileResponse>(
+            var profileResponse = await GetResponse<VanityProfileResponse>(
                     _config.ApiSteamUserController,
                     _config.ApiSteamUserVanityUrlAction, 
                     "v0001", 
@@ -54,9 +55,9 @@ namespace Steamline.co.Api.V1.Services
 
         }
 
-        public List<Game> GetGamesFromProfile(string steamId64)
+        public async Task<List<Game>> GetGamesFromProfile(string steamId64)
         {
-            var gamesResponse = GetResponse<GameResponse>(
+            var gamesResponse = await GetResponse<GameResponse>(
                     _config.ApiSteamUserController,
                     _config.ApiSteamPlayerServiceOwnedGamesAction, 
                     "v0001", 
@@ -83,7 +84,7 @@ namespace Steamline.co.Api.V1.Services
             }
         }
 
-        private T GetResponse<T>(string controller, string action, string apiVersion, params string[] parameters) where T : class
+        private async Task<T> GetResponse<T>(string controller, string action, string apiVersion, params string[] parameters) where T : class
         {
             var parameterList = parameters.ToList();
             parameterList.Insert(0, _config.ApiKeyParameter);
@@ -97,8 +98,9 @@ namespace Steamline.co.Api.V1.Services
                         apiVersion, 
                         string.Join("&", parameterList)));
                         
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
+                WebResponse response = await request.GetResponseAsync();
+                var httpResponse = (HttpWebResponse)response;
+                StreamReader reader = new StreamReader(httpResponse.GetResponseStream());
                 string jsonResponse = reader.ReadToEnd();
                 return JsonConvert.DeserializeObject<T>(jsonResponse);
             }

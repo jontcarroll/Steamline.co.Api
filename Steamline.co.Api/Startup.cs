@@ -62,16 +62,18 @@ namespace Steamline.co.Api
 
             // New every time it is injected
             services.AddTransient<IGameFinderService, GameFinderService>();
+            services.AddTransient<ISteamService, SteamService>();
+
    
             // New per request .AddScoped<>(...)
 
             // Only created when server starts
             services.AddSingleton<IWorkerQueue, WorkerQueue>();
-            services.AddSingleton<ISteamService, SteamService>();
-
+  
 
             // Hosted Services (Can be used for generating group IDs to prevent issues with back to back code generation)
             services.AddHostedService<WorkerQueueHostedService>();
+
 
             services.AddAuthorization(options => {
                 options.AddPolicy("SignedIn", p => {

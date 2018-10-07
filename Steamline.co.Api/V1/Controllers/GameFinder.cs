@@ -21,11 +21,18 @@ namespace Steamline.co.Api.V1.Controllers
         }
 
         [HttpGet("{groupCode}/{url}")]
-        public ServiceActionResult GetGamesFromProfileUrl(string groupCode, string url)
+        public async Task<ServiceActionResult> GetGamesFromProfileUrl(string groupCode, string url)
         {
             //Need to handle encoding from client, for now just doing this
             url = $"https://steamcommunity.com/profiles/{url}";
-            var result = _gameFinderService.GetGamesFromProfileUrl(url, groupCode);
+            var result = await _gameFinderService.GetGamesFromProfileUrl(url, groupCode);
+            return ServiceActionResultFactory.Create(result);
+        }
+
+        [HttpGet("gamedetails/{appId}")]
+        public async Task<ServiceActionResult> GetGameDetails(long appId)
+        {
+            var result = await _gameFinderService.GetGameDetails(appId);
             return ServiceActionResultFactory.Create(result);
         }
     }
