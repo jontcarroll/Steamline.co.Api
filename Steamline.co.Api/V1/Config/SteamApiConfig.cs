@@ -10,6 +10,7 @@ namespace Steamline.co.Api.V1.Config
         
         public string ApiSteamPlayerServiceController { get; set; }
         public string ApiSteamPlayerServiceOwnedGamesAction { get; set; }
+        public string GetAllAppsEndpoint { get; set; }
 
         public string ApiKeyParameter
         {

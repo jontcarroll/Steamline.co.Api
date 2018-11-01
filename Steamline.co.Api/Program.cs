@@ -1,9 +1,10 @@
-﻿using System;
-using System.IO;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Serilog.Events;
+using System;
+using System.IO;
 
 namespace Steamline.co.Api
 {
@@ -20,8 +21,9 @@ namespace Steamline.co.Api
 
         public static int Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(Configuration)
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .WriteTo.File(Path.Combine(Environment.CurrentDirectory, "SteamLineLog.txt"), rollingInterval: RollingInterval.Day)
                 .Enrich.FromLogContext()
                 .CreateLogger();
 

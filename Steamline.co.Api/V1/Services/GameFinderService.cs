@@ -1,19 +1,21 @@
-using System.IO;
-using System.Collections.Generic;
-using Steamline.co.Api.V1.Models;
-using Steamline.co.Api.V1.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using Steamline.co.Api.V1.Helpers;
+using Steamline.co.Api.V1.Models;
 using Steamline.co.Api.V1.Models.GameFinder;
-using System;
+using Steamline.co.Api.V1.Models.SteamApi;
+using Steamline.co.Api.V1.Services.Interfaces;
 using Steamline.co.Api.V1.Services.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Steamline.co.Api.V1.Services
 {
     public class GameFinderService : IGameFinderService
     {
-        ILogger<GameFinderService> _logger;
-        ISteamService _steamService;
+        private ILogger<GameFinderService> _logger;
+        private ISteamService _steamService;
 
         public GameFinderService(ILogger<GameFinderService> logger, ISteamService steamService)
         {
@@ -21,32 +23,31 @@ namespace Steamline.co.Api.V1.Services
             _steamService = steamService;
         }
 
-        public async Task<IServiceResult<GameModel, ApiErrorModel>> GetGameDetails(long appId)
+        public async Task<IServiceResult<GameDetails, ApiErrorModel>> GetGameDetails(long appId)
         {
+            var gameDetails = SteamGames.GameDetails[appId] ?? await _steamService.GetGameDetailsAsync(appId);
 
-            var apiResult = _steamService.GetGameDetails(appId);
-
-            if (apiResult == null) 
+            if (gameDetails == null)
             {
-                throw new Exception("");
+                return ServiceResultFactory.Error<GameDetails, ApiErrorModel>(new ApiErrorModel()
+                {
+                    Errors = new List<string>() { $"Failed to find game for app id: {appId}" },
+                    Type = ApiErrorModel.TYPE_SILENT_ERROR
+                });
             }
 
-            var retVal = new GameModel() {
-
-            };
-
-            return ServiceResultFactory.Ok<GameModel, ApiErrorModel>(retVal);
+            return ServiceResultFactory.Ok<GameDetails, ApiErrorModel>(gameDetails);
         }
 
-        public async Task<IServiceResult<List<GameModel>, ApiErrorModel>> GetGamesFromProfileUrl(string url, string groupCode)
+        public async Task<IServiceResult<List<GameDetails>, ApiErrorModel>> GetGamesFromProfileUrl(string url)
         {
-            var steamId = string.Empty;
+            string steamId = string.Empty;
             try
             {
-                steamId = await _steamService.Get64BitSteamId(url);
+                steamId = await _steamService.Get64BitSteamIdAsync(url);
                 _logger.LogDebug($"SteamID for {url}: {steamId}");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //Type of error that is expected and should be relayed back to the client as a toast message
                 _logger.LogError(ex, $"Failed to find Steam Id for {url}");
@@ -55,10 +56,10 @@ namespace Steamline.co.Api.V1.Services
                     Errors = new List<string>() { $"No Steam profile found for {url}" },
                     Type = ApiErrorModel.TYPE_TOAST_ERROR
                 };
-                return ServiceResultFactory.Error<List<GameModel>, ApiErrorModel>(em);
+                return ServiceResultFactory.Error<List<GameDetails>, ApiErrorModel>(em);
             }
 
-            var games = await _steamService.GetGamesFromProfile(steamId);
+            var games = await _steamService.GetGamesFromProfileAsync(steamId);
             //Example of an error that is unexpected and should not be displayed in the browser
             if (games == null)
             {
@@ -67,7 +68,7 @@ namespace Steamline.co.Api.V1.Services
                     Errors = new List<string>() { $"Failed to find games for Steam Id: {steamId}" },
                     Type = ApiErrorModel.TYPE_SILENT_ERROR
                 };
-                return ServiceResultFactory.Error<List<GameModel>, ApiErrorModel>(em);
+                return ServiceResultFactory.Error<List<GameDetails>, ApiErrorModel>(em);
             }
 
             //Type of error that is expected and should be relayed back to the client as a toast message
@@ -79,26 +80,13 @@ namespace Steamline.co.Api.V1.Services
                     Type = ApiErrorModel.TYPE_TOAST_ERROR
                 };
 
-                return ServiceResultFactory.Error<List<GameModel>, ApiErrorModel>(em);
+                return ServiceResultFactory.Error<List<GameDetails>, ApiErrorModel>(em);
             }
 
-            var retVal = new List<GameModel>();
-            foreach (var game in games)
-            {
-                retVal.Add(new GameModel()
-                {
-                    AppId = game.AppId,
-                    Name = game.Name,
-                    PlaytimeForever = game.PlaytimeForever,
-                    ImgIconUrl = game.ImgIconUrl,
-                    ImgLogoUrl = game.ImgLogoUrl,
-                    HasCommunityVisibleStats = game.HasCommunityVisibleStats,
-                    Playtime2Weeks = game.Playtime2Weeks
-                });
-            }
+            var returnValues = games.Select(g => SteamGames.GameDetails[g.AppId]).ToList();
 
 
-            return ServiceResultFactory.Ok<List<GameModel>, ApiErrorModel>(retVal);
+            return ServiceResultFactory.Ok<List<GameDetails>, ApiErrorModel>(returnValues);
         }
 
     }

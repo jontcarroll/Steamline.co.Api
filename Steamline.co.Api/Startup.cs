@@ -22,6 +22,11 @@ using Steamline.co.Api.V1.Middleware.Extensions;
 using Steamline.co.Api.V1.Filters;
 using Steamline.co.Api.V1.Services.Utils;
 using Steamline.co.Api.V1.Config;
+using System.Net.WebSockets;
+using System.Threading;
+using Steamline.co.Api.V1.Services.Websocket;
+using Steamline.co.Api.V1.Middleware;
+using Steamline.co.Api.V1.Services.ScheduledTasks;
 
 namespace Steamline.co.Api
 {
@@ -59,12 +64,14 @@ namespace Steamline.co.Api
 
             // Config
             services.Configure<SteamApiConfig>(Configuration.GetSection("SteamApiConfig"));
+            services.Configure<ElasticSearchConfig>(Configuration.GetSection("ElasticSearch"));
 
             // New every time it is injected
             services.AddTransient<IGameFinderService, GameFinderService>();
             services.AddTransient<ISteamService, SteamService>();
+            services.AddTransient<ElasticService>();
+            services.AddTransient<GameSearchService>();
 
-   
             // New per request .AddScoped<>(...)
 
             // Only created when server starts
@@ -74,6 +81,13 @@ namespace Steamline.co.Api
             // Hosted Services (Can be used for generating group IDs to prevent issues with back to back code generation)
             services.AddHostedService<WorkerQueueHostedService>();
 
+            // Add scheduled tasks & scheduler
+            services.AddSingleton<IScheduledTask, AddMissingApps>();
+            services.AddSingleton<IScheduledTask, UpdateAppDetails>();
+            services.AddScheduler();
+
+            services.AddSingleton<ICustomWebSocketFactory, CustomWebSocketFactory>();
+            services.AddSingleton<ICustomWebSocketMessageHandler, CustomWebSocketMessageHandler>();
 
             services.AddAuthorization(options => {
                 options.AddPolicy("SignedIn", p => {
@@ -113,6 +127,8 @@ namespace Steamline.co.Api
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseAuthentication();
+            app.UseWebSockets();
+            app.UseCustomWebSocketManager();
             app.UseMvc();
         }
     }
