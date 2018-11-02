@@ -9,7 +9,8 @@ namespace Steamline.co.Api.V1.Services.Interfaces
 {
     public interface ICustomWebSocketMessageHandler
     {
-        Task SendInitialMessagesAsync(CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
+        Task SendInitialMessageAsync(CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
+        Task SendDisconnectMessageAsync(CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
         Task HandleMessageAsync(WebSocketReceiveResult result, byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
         Task BroadcastInGroupAsync(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
         Task BroadcastAllAsync(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);

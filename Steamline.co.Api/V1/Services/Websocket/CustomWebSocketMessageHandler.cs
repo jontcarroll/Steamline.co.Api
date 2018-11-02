@@ -10,7 +10,7 @@ namespace Steamline.co.Api.V1.Services.Websocket
 {
     public class CustomWebSocketMessageHandler : ICustomWebSocketMessageHandler
     {
-        public async Task SendInitialMessagesAsync(CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
+        public async Task SendInitialMessageAsync(CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
         {
             var webSocket = userWebSocket.WebSocket;
             var msg = new CustomWebSocketMessage
@@ -19,6 +19,22 @@ namespace Steamline.co.Api.V1.Services.Websocket
                 Type = WebSocketMessageType.Text,
                 Username = userWebSocket.UserId,
                 WebSocketMessageType = "onUserJoin"
+            };
+
+            string serialisedMessage = JsonConvert.SerializeObject(msg);
+            byte[] bytes = Encoding.ASCII.GetBytes(serialisedMessage);
+            await BroadcastInGroupAsync(bytes, userWebSocket, wsFactory);
+        }
+
+        public async Task SendDisconnectMessageAsync(CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
+        {
+            var webSocket = userWebSocket.WebSocket;
+            var msg = new CustomWebSocketMessage
+            {
+                MessageDateTime = DateTime.Now,
+                Type = WebSocketMessageType.Text,
+                Username = userWebSocket.UserId,
+                WebSocketMessageType = "onUserLeave"
             };
 
             string serialisedMessage = JsonConvert.SerializeObject(msg);

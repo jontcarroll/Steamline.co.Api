@@ -43,7 +43,7 @@ namespace Steamline.co.Api.V1.Middleware
                         };
                         wsFactory.Add(userWebSocket);
                         _logger.Log(LogLevel.Information, new EventId((int)LogEventId.User), $"User {userId} joined group {groupId}");
-                        await wsmHandler.SendInitialMessagesAsync(userWebSocket, wsFactory);
+                        await wsmHandler.SendInitialMessageAsync(userWebSocket, wsFactory);
                         await ListenAsync(context, userWebSocket, wsFactory, wsmHandler);
                     }
                 }
@@ -66,6 +66,7 @@ namespace Steamline.co.Api.V1.Middleware
                 buffer = new byte[1024 * 4];
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
+            await wsmHandler.SendDisconnectMessageAsync(userWebSocket, wsFactory);
             wsFactory.Remove(userWebSocket.GroupId, userWebSocket.UserId);
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
