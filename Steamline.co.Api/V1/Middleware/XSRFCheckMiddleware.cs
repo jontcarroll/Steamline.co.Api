@@ -11,11 +11,11 @@ namespace Steamline.co.Api.V1.Middleware
 {
     public class XSRFCheckMiddleware
     {
-        private readonly RequestDelegate _next;
+        private readonly RequestDelegate _nextAsync;
 
         public XSRFCheckMiddleware(RequestDelegate next)
         {
-            _next = next;
+            _nextAsync = next;
         }
 
         public async Task InvokeAsync(HttpContext context, IAntiforgery antiforgery)
@@ -29,7 +29,7 @@ namespace Steamline.co.Api.V1.Middleware
             }
             else {
                 // continue on the pipeline
-                await _next(context);
+                await _nextAsync(context);
             }
         }
     }

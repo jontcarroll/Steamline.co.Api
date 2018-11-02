@@ -11,10 +11,10 @@ namespace Steamline.co.Api.V1.Filters
 {
     public class ModelValidationActionFilter : IAsyncActionFilter
     {
-        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate nextAsync)
         {
             if (context.ModelState.IsValid) {
-                var resultContext = await next();
+                var resultContext = await nextAsync();
             } 
 
             var error = new ValidationErrorModel();

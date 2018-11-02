@@ -27,14 +27,14 @@ namespace Steamline.co.Api.V1.Controllers
         [HttpGet("getSteamIdFromProfileUrl")]
         public async Task<ServiceActionResult> GetSteamIdFromProfileUrl(string url)
         {
-            var result = await _gameFinderService.GetSteamIdFromProfileUrl(url);
+            var result = await _gameFinderService.GetSteamIdFromProfileUrlAsync(url);
             return ServiceActionResultFactory.Create(result);
         }
 
         [HttpGet("gamedetails/{appId}")]
         public async Task<ServiceActionResult> GetGameDetails(long appId)
         {
-            var result = await _gameFinderService.GetGameDetails(appId);
+            var result = await _gameFinderService.GetGameDetailsAsync(appId);
             return ServiceActionResultFactory.Create(result);
         }
 

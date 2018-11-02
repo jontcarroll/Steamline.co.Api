@@ -36,15 +36,15 @@ namespace Steamline.co.Api.V1.Services
         {
             while (!_shutdown.IsCancellationRequested)
             {
-                var workItem = await _taskQueue.DequeueAsync(_shutdown.Token);
+                var workItemAsync = await _taskQueue.DequeueAsync(_shutdown.Token);
 
                 try
                 {
-                    await workItem(_shutdown.Token);
+                    await workItemAsync(_shutdown.Token);
                 }
                 catch (Exception)
                 {
-                    _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), $"Error occurred executing {nameof(workItem)}.");
+                    _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), $"Error occurred executing {nameof(workItemAsync)}.");
                 }
             }
         }

@@ -33,16 +33,16 @@ namespace Steamline.co.Api.V1.Services.Utils
         }
 
         public Task<T> EnqueueAsync<T>(
-            Func<TaskCompletionSource<T>, CancellationToken, Task> workItem)
+            Func<TaskCompletionSource<T>, CancellationToken, Task> workItemAsync)
         {
-            if (workItem == null)
+            if (workItemAsync == null)
             {
-                throw new ArgumentNullException(nameof(workItem));
+                throw new ArgumentNullException(nameof(workItemAsync));
             }
 
             var promise = new TaskCompletionSource<T>();
             Func<CancellationToken, Task> wrapper = async token => {
-                await workItem(promise, token);
+                await workItemAsync(promise, token);
             };
 
             _workItems.Enqueue(wrapper);

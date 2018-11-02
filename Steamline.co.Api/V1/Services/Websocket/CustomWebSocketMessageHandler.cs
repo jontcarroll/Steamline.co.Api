@@ -10,38 +10,41 @@ namespace Steamline.co.Api.V1.Services.Websocket
 {
     public class CustomWebSocketMessageHandler : ICustomWebSocketMessageHandler
     {
-        public async Task SendInitialMessages(CustomWebSocket userWebSocket)
+        public async Task SendInitialMessagesAsync(CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
         {
             var webSocket = userWebSocket.WebSocket;
             var msg = new CustomWebSocketMessage
             {
                 MessageDateTime = DateTime.Now,
                 Type = WebSocketMessageType.Text,
-                Text = "",
-                Username = "system"
+                Username = userWebSocket.UserId,
+                WebSocketMessageType = "onUserJoin"
             };
 
             string serialisedMessage = JsonConvert.SerializeObject(msg);
             byte[] bytes = Encoding.ASCII.GetBytes(serialisedMessage);
-            await webSocket.SendAsync(new ArraySegment<byte>(bytes, 0, bytes.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+            await BroadcastInGroupAsync(bytes, userWebSocket, wsFactory);
         }
 
-        public async Task HandleMessage(WebSocketReceiveResult result, byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
+        public async Task HandleMessageAsync(WebSocketReceiveResult result, byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
         {
             var msg = Encoding.ASCII.GetString(buffer).TrimEnd('\0');
             try
             {
+                var incomingMessage = JsonConvert.DeserializeObject<IncomingWebSocketMessageWrapper>(msg);
+
                 var message = new CustomWebSocketMessage()
                 {
                     MessageDateTime = DateTime.Now,
                     Type = WebSocketMessageType.Text,
-                    Text = msg,
-                    Username = userWebSocket.UserId
+                    Username = userWebSocket.UserId,
+                    Text = incomingMessage.Message,
+                    WebSocketMessageType = incomingMessage.WebSocketMessageType,
                 };
 
                 var output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(message));
 
-                await BroadcastInGroup(output, userWebSocket, wsFactory);
+                await BroadcastInGroupAsync(output, userWebSocket, wsFactory);
             }
             catch (Exception)
             {
@@ -49,7 +52,7 @@ namespace Steamline.co.Api.V1.Services.Websocket
             }
         }
 
-        public async Task BroadcastInGroup(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
+        public async Task BroadcastInGroupAsync(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
         {
             var others = wsFactory.AllInGroup(userWebSocket);
             foreach (var uws in others)
@@ -58,7 +61,7 @@ namespace Steamline.co.Api.V1.Services.Websocket
             }
         }
 
-        public async Task BroadcastAll(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
+        public async Task BroadcastAllAsync(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
         {
             var all = wsFactory.All();
             foreach (var uws in all)

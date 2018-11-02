@@ -153,7 +153,7 @@ namespace Steamline.co.Api.V1.Services
                 string storeLanguage = "en";
 
                 var steamRequest = GetSteamRequest(string.Format("http://store.steampowered.com/app/{0}/?l=" + storeLanguage, appId));
-                response = await HandleRedirect(steamRequest);
+                response = await HandleRedirectAsync(steamRequest);
 
                 int count = 0;
                 while (response.StatusCode == HttpStatusCode.Found && count < 5)
@@ -167,7 +167,7 @@ namespace Steamline.co.Api.V1.Services
                         return new List<string>();
 
                     steamRequest = GetSteamRequest(response.Headers[HttpResponseHeader.Location]);
-                    response = await HandleRedirect(steamRequest);
+                    response = await HandleRedirectAsync(steamRequest);
                     count++;
                 }
 
@@ -243,7 +243,7 @@ namespace Steamline.co.Api.V1.Services
             return new List<string>();
         }
 
-        private static async Task<HttpWebResponse> HandleRedirect(HttpWebRequest steamRequest)
+        private static async Task<HttpWebResponse> HandleRedirectAsync(HttpWebRequest steamRequest)
         {
             try
             {

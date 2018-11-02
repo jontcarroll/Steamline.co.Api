@@ -24,7 +24,7 @@ namespace Steamline.co.Api.V1.Services
             _gameSearchService = gameSearchService;
         }
 
-        public async Task<IServiceResult<GameDetails, ApiErrorModel>> GetGameDetails(long appId)
+        public async Task<IServiceResult<GameDetails, ApiErrorModel>> GetGameDetailsAsync(long appId)
         {
             var gameDetails = await _steamService.GetGameDetailsAsync(appId);
 
@@ -45,7 +45,7 @@ namespace Steamline.co.Api.V1.Services
             return ServiceResultFactory.Ok<GameDetails, ApiErrorModel>(gameDetails.Value);
         }
 
-        public async Task<IServiceResult<string, ApiErrorModel>> GetSteamIdFromProfileUrl(string url)
+        public async Task<IServiceResult<string, ApiErrorModel>> GetSteamIdFromProfileUrlAsync(string url)
         {
             string steamId = string.Empty;
             try

@@ -13,12 +13,12 @@ namespace Steamline.co.Api.V1.Middleware
 
     public class CustomWebSocketManager
     {
-        private readonly RequestDelegate _next;
+        private readonly RequestDelegate _nextAsync;
         private readonly ILogger<Player> _logger;
 
         public CustomWebSocketManager(RequestDelegate next, ILogger<Player> logger)
         {
-            _next = next;
+            _nextAsync = next;
             _logger = logger;
         }
 
@@ -43,7 +43,8 @@ namespace Steamline.co.Api.V1.Middleware
                         };
                         wsFactory.Add(userWebSocket);
                         _logger.Log(LogLevel.Information, new EventId((int)LogEventId.User), $"User {userId} joined group {groupId}");
-                        await Listen(context, userWebSocket, wsFactory, wsmHandler);
+                        await wsmHandler.SendInitialMessagesAsync(userWebSocket, wsFactory);
+                        await ListenAsync(context, userWebSocket, wsFactory, wsmHandler);
                     }
                 }
                 else
@@ -51,17 +52,17 @@ namespace Steamline.co.Api.V1.Middleware
                     context.Response.StatusCode = 400;
                 }
             }
-            await _next(context);
+            await _nextAsync(context);
         }
 
-        private async Task Listen(HttpContext context, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory, ICustomWebSocketMessageHandler wsmHandler)
+        private async Task ListenAsync(HttpContext context, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory, ICustomWebSocketMessageHandler wsmHandler)
         {
             var webSocket = userWebSocket.WebSocket;
             byte[] buffer = new byte[1024 * 4];
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             while (!result.CloseStatus.HasValue)
             {
-                await wsmHandler.HandleMessage(result, buffer, userWebSocket, wsFactory);
+                await wsmHandler.HandleMessageAsync(result, buffer, userWebSocket, wsFactory);
                 buffer = new byte[1024 * 4];
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }

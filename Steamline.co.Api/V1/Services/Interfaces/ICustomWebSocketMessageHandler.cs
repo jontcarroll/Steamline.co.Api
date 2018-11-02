@@ -9,10 +9,10 @@ namespace Steamline.co.Api.V1.Services.Interfaces
 {
     public interface ICustomWebSocketMessageHandler
     {
-        Task SendInitialMessages(CustomWebSocket userWebSocket);
-        Task HandleMessage(WebSocketReceiveResult result, byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
-        Task BroadcastInGroup(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
-        Task BroadcastAll(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
+        Task SendInitialMessagesAsync(CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
+        Task HandleMessageAsync(WebSocketReceiveResult result, byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
+        Task BroadcastInGroupAsync(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
+        Task BroadcastAllAsync(byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory);
     }
 
 }
