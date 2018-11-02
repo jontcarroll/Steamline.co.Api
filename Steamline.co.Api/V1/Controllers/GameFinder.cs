@@ -9,13 +9,14 @@ namespace Steamline.co.Api.V1.Controllers
     [Route("api/v{version:apiVersion}/gamefinder")]
     public class GameFinder : Controller
     {
-        private IGameFinderService _gameFinderService;
-        public GameFinder(IGameFinderService gameFinderService)
+        private readonly IGameFinderService _gameFinderService;
+        private readonly ISteamService _steamService;
+        public GameFinder(IGameFinderService gameFinderService, ISteamService steamService)
         {
             _gameFinderService = gameFinderService;
         }
 
-        [HttpGet("{groupCode}/{url}")]
+        [HttpGet("getGamesFromProfileUrl/{url}")]
         public async Task<ServiceActionResult> GetGamesFromProfileUrl(string url)
         {
             var result = await _gameFinderService.GetGamesFromProfileUrlAsync(url);
@@ -26,6 +27,13 @@ namespace Steamline.co.Api.V1.Controllers
         public async Task<ServiceActionResult> GetGameDetails(long appId)
         {
             var result = await _gameFinderService.GetGameDetails(appId);
+            return ServiceActionResultFactory.Create(result);
+        }
+
+        [HttpGet("GetUserDetails")]
+        public async Task<ServiceActionResult> GetUserDetails(string[] userIds)
+        {
+            var result = await _steamService.GetPlayersAsync(userIds);
             return ServiceActionResultFactory.Create(result);
         }
     }

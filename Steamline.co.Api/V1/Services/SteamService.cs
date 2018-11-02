@@ -60,6 +60,17 @@ namespace Steamline.co.Api.V1.Services
 
         }
 
+        public async Task<IServiceResult<List<Player>, ApiErrorModel>> GetPlayersAsync(params string[] steamIds)
+        {
+            var profileResponse = await GetResponseAsync<PlayerRootResponse>(
+                    _config.ApiSteamUserController,
+                    _config.ApiSteamPlayerSummariesAction,
+                    "v0002",
+                    $"steamids={string.Join(',', steamIds)}");
+
+            return ServiceResultFactory.Ok<List<Player>, ApiErrorModel>(profileResponse?.Response?.Players ?? new List<Player>());
+        }
+
         public async Task<List<Game>> GetGamesFromProfileAsync(string steamId64)
         {
             var gamesResponse = await GetResponseAsync<GameResponse>(

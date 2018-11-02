@@ -12,5 +12,6 @@ namespace Steamline.co.Api.V1.Services.Interfaces
         Task<IServiceResult<GameDetails, ApiErrorModel>> GetGameDetailsAsync(long appId);
         Task<List<App>> GetAllAppsAsync();
         Task<List<string>> GetTagsFromGameAsync(long appId);
+        Task<IServiceResult<List<Player>, ApiErrorModel>> GetPlayersAsync(params string[] steamIds);
     }
 }

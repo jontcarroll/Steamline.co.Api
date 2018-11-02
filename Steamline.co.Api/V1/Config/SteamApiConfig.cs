@@ -7,6 +7,7 @@ namespace Steamline.co.Api.V1.Config
 
         public string ApiSteamUserController { get; set; }
         public string ApiSteamUserVanityUrlAction { get; set; }
+        public string ApiSteamPlayerSummariesAction { get; set; }
         
         public string ApiSteamPlayerServiceController { get; set; }
         public string ApiSteamPlayerServiceOwnedGamesAction { get; set; }
