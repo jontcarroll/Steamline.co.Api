@@ -64,7 +64,7 @@ namespace Steamline.co.Api.V1.Services
                         {
                             var args = new UnobservedTaskExceptionEventArgs(ex as AggregateException ?? new AggregateException(ex));
 
-                            _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), ex.ToString());
+                            _logger.Log(LogLevel.Error, new EventId((int)LogEventId.ScheduledTasks), ex.ToString());
 
                             if (!args.Observed)
                             {

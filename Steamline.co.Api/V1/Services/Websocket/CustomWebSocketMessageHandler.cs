@@ -38,7 +38,7 @@ namespace Steamline.co.Api.V1.Services.Websocket
                     MessageDateTime = DateTime.Now,
                     Type = WebSocketMessageType.Text,
                     Username = userWebSocket.UserId,
-                    Text = incomingMessage.Message,
+                    Message = incomingMessage.Message,
                     WebSocketMessageType = incomingMessage.WebSocketMessageType,
                 };
 

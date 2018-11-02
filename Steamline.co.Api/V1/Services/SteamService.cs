@@ -100,7 +100,7 @@ namespace Steamline.co.Api.V1.Services
             {
                 var em = new ApiErrorModel()
                 {
-                    Errors = new List<string>() { "Rate limited", ex.ToString() },
+                    Errors = new List<string>() { ex.Message.Contains("429") ? "Rate limited" : ex.ToString() },
                     Type = ApiErrorModel.TYPE_SERVER_ERROR
                 };
                 return ServiceResultFactory.Error<GameDetails, ApiErrorModel>(em);

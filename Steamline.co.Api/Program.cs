@@ -26,6 +26,7 @@ namespace Steamline.co.Api
             Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .WriteTo.Logger(cc => cc.Filter.ByIncludingOnly(WithProperty("EventId", (int)LogEventId.General)).WriteTo.File(LogFilePath("SteamLineLog.txt"), rollingInterval: RollingInterval.Day))
+                .WriteTo.Logger(cc => cc.Filter.ByIncludingOnly(WithProperty("EventId", (int)LogEventId.ScheduledTasks)).WriteTo.File(LogFilePath("SteamLineScheduledTasks.txt"), rollingInterval: RollingInterval.Day))
                 .WriteTo.Logger(cc => cc.Filter.ByIncludingOnly(WithProperty("EventId", (int)LogEventId.User)).WriteTo.File(LogFilePath("SteamLineUser.txt"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: null, rollOnFileSizeLimit: true))
                 .Enrich.FromLogContext()
                 .CreateLogger();
