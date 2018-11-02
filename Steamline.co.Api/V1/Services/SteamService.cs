@@ -75,7 +75,7 @@ namespace Steamline.co.Api.V1.Services
         public async Task<List<Game>> GetGamesFromProfileAsync(string steamId64)
         {
             var gamesResponse = await GetResponseAsync<GameResponse>(
-                    _config.ApiSteamUserController,
+                    _config.ApiSteamPlayerServiceController,
                     _config.ApiSteamPlayerServiceOwnedGamesAction,
                     "v0001",
                     "include_appinfo=1",

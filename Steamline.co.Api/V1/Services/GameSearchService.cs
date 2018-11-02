@@ -43,7 +43,7 @@ namespace Steamline.co.Api.V1.Services
 
         public async Task<List<GameDetails>> GetAsync(params long[] appIds)
         {
-            var response = await _client.SearchAsync<GameDetails>(x => x.Query(g => g.Ids(i => i.Values(appIds))));
+            var response = await _client.SearchAsync<GameDetails>(x => x.Query(g => g.Ids(i => i.Values(appIds))).Size(10000));
             return response.Documents.ToList();
         }
 

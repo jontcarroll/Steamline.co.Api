@@ -14,12 +14,20 @@ namespace Steamline.co.Api.V1.Controllers
         public GameFinder(IGameFinderService gameFinderService, ISteamService steamService)
         {
             _gameFinderService = gameFinderService;
+            _steamService = steamService;
         }
 
-        [HttpGet("getGamesFromProfileUrl/{url}")]
-        public async Task<ServiceActionResult> GetGamesFromProfileUrl(string url)
+        [HttpGet("getGamesForUser/{steamId64}")]
+        public async Task<ServiceActionResult> GetGamesForUser(string steamId64)
         {
-            var result = await _gameFinderService.GetGamesFromProfileUrlAsync(url);
+            var result = await _gameFinderService.GetGamesForSteamIdAsync(steamId64);
+            return ServiceActionResultFactory.Create(result);
+        }
+
+        [HttpGet("getSteamIdFromProfileUrl")]
+        public async Task<ServiceActionResult> GetSteamIdFromProfileUrl(string url)
+        {
+            var result = await _gameFinderService.GetSteamIdFromProfileUrl(url);
             return ServiceActionResultFactory.Create(result);
         }
 
@@ -30,7 +38,7 @@ namespace Steamline.co.Api.V1.Controllers
             return ServiceActionResultFactory.Create(result);
         }
 
-        [HttpGet("GetUserDetails")]
+        [HttpGet("getUserDetails")]
         public async Task<ServiceActionResult> GetUserDetails(string[] userIds)
         {
             var result = await _steamService.GetPlayersAsync(userIds);

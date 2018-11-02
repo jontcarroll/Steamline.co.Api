@@ -45,7 +45,7 @@ namespace Steamline.co.Api.V1.Services
             return ServiceResultFactory.Ok<GameDetails, ApiErrorModel>(gameDetails.Value);
         }
 
-        public async Task<IServiceResult<List<GameDetails>, ApiErrorModel>> GetGamesFromProfileUrlAsync(string url)
+        public async Task<IServiceResult<string, ApiErrorModel>> GetSteamIdFromProfileUrl(string url)
         {
             string steamId = string.Empty;
             try
@@ -57,21 +57,27 @@ namespace Steamline.co.Api.V1.Services
             {
                 //Type of error that is expected and should be relayed back to the client as a toast message
                 _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), $"Failed to find Steam Id for {url}");
+                _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), ex.ToString());
                 var em = new ApiErrorModel()
                 {
                     Errors = new List<string>() { $"No Steam profile found for {url}" },
                     Type = ApiErrorModel.TYPE_TOAST_ERROR
                 };
-                return ServiceResultFactory.Error<List<GameDetails>, ApiErrorModel>(em);
-            }
 
-            var games = await _steamService.GetGamesFromProfileAsync(steamId);
+                return ServiceResultFactory.Error<string, ApiErrorModel>(em);
+            }
+            return ServiceResultFactory.Ok<string, ApiErrorModel>(steamId);
+        }
+
+        public async Task<IServiceResult<List<GameDetails>, ApiErrorModel>> GetGamesForSteamIdAsync(string steamId64)
+        {
+            var games = await _steamService.GetGamesFromProfileAsync(steamId64);
             //Example of an error that is unexpected and should not be displayed in the browser
             if (games == null)
             {
                 var em = new ApiErrorModel()
                 {
-                    Errors = new List<string>() { $"Failed to find games for Steam Id: {steamId}" },
+                    Errors = new List<string>() { $"Failed to find games for Steam Id: {steamId64}" },
                     Type = ApiErrorModel.TYPE_SILENT_ERROR
                 };
                 return ServiceResultFactory.Error<List<GameDetails>, ApiErrorModel>(em);
@@ -82,7 +88,7 @@ namespace Steamline.co.Api.V1.Services
             {
                 var em = new ApiErrorModel()
                 {
-                    Errors = new List<string>() { $"No games found for Steam Id: {steamId}" },
+                    Errors = new List<string>() { $"No games found for Steam Id: {steamId64}" },
                     Type = ApiErrorModel.TYPE_TOAST_ERROR
                 };
 
@@ -94,6 +100,5 @@ namespace Steamline.co.Api.V1.Services
 
             return ServiceResultFactory.Ok<List<GameDetails>, ApiErrorModel>(returnValues);
         }
-
     }
 }

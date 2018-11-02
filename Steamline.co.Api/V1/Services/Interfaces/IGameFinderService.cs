@@ -8,8 +8,9 @@ namespace Steamline.co.Api.V1.Services.Interfaces
 {
     public interface IGameFinderService
     {
-        Task<IServiceResult<List<GameDetails>, ApiErrorModel>> GetGamesFromProfileUrlAsync(string url);
+        Task<IServiceResult<string, ApiErrorModel>> GetSteamIdFromProfileUrl(string url);
         Task<IServiceResult<GameDetails, ApiErrorModel>> GetGameDetails(long appId);
+        Task<IServiceResult<List<GameDetails>, ApiErrorModel>> GetGamesForSteamIdAsync(string steamId64);
 
 
     }
