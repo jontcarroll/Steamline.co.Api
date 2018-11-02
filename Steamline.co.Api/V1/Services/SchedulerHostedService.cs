@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Steamline.co.Api.V1.Helpers;
 using Steamline.co.Api.V1.Services.Interfaces;
 using Steamline.co.Api.V1.Services.Utils;
 using Steamline.co.Api.V1.Services.Utils.Cron;
@@ -18,7 +19,7 @@ namespace Steamline.co.Api.V1.Services
         public SchedulerHostedService(ILogger<IScheduledTask> logger, IEnumerable<IScheduledTask> scheduledTasks)
         {
             var referenceTime = DateTime.UtcNow;
-            logger = _logger;
+            _logger = logger;
 
             foreach (var scheduledTask in scheduledTasks)
             {
@@ -63,7 +64,7 @@ namespace Steamline.co.Api.V1.Services
                         {
                             var args = new UnobservedTaskExceptionEventArgs(ex as AggregateException ?? new AggregateException(ex));
 
-                            _logger.LogError(ex.ToString());
+                            _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), ex.ToString());
 
                             if (!args.Observed)
                             {

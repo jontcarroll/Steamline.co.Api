@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Steamline.co.Api.V1.Helpers;
 using Steamline.co.Api.V1.Models;
 using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Interfaces;
@@ -50,12 +51,12 @@ namespace Steamline.co.Api.V1.Services
             try
             {
                 steamId = await _steamService.Get64BitSteamIdAsync(url);
-                _logger.LogDebug($"SteamID for {url}: {steamId}");
+                _logger.Log(LogLevel.Debug, new EventId((int)LogEventId.General), $"SteamID for {url}: {steamId}");
             }
             catch (Exception ex)
             {
                 //Type of error that is expected and should be relayed back to the client as a toast message
-                _logger.LogError(ex, $"Failed to find Steam Id for {url}");
+                _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), $"Failed to find Steam Id for {url}");
                 var em = new ApiErrorModel()
                 {
                     Errors = new List<string>() { $"No Steam profile found for {url}" },

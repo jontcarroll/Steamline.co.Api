@@ -1,10 +1,10 @@
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Steamline.co.Api.V1.Helpers;
+using Steamline.co.Api.V1.Services.Utils;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-
-using Steamline.co.Api.V1.Services.Utils;
 
 namespace Steamline.co.Api.V1.Services
 {
@@ -25,7 +25,7 @@ namespace Steamline.co.Api.V1.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Queued Hosted Service is starting.");
+            _logger.Log(LogLevel.Information, new EventId((int)LogEventId.General), "Queued Hosted Service is starting.");
 
             _backgroundTask = Task.Run(BackgroundProceessing);
 
@@ -42,21 +42,20 @@ namespace Steamline.co.Api.V1.Services
                 {
                     await workItem(_shutdown.Token);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    _logger.LogError(ex, 
-                        $"Error occurred executing {nameof(workItem)}.");
+                    _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), $"Error occurred executing {nameof(workItem)}.");
                 }
             }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Queued Hosted Service is stopping.");
+            _logger.Log(LogLevel.Information, new EventId((int)LogEventId.General), "Queued Hosted Service is stopping.");
 
             _shutdown.Cancel();
 
-            return Task.WhenAny(_backgroundTask, 
+            return Task.WhenAny(_backgroundTask,
                 Task.Delay(Timeout.Infinite, cancellationToken));
         }
     }

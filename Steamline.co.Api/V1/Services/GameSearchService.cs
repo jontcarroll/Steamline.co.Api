@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Nest;
 using Steamline.co.Api.V1.Config;
+using Steamline.co.Api.V1.Helpers;
 using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Utils;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace Steamline.co.Api.V1.Services
             {
                 var response = await _client.CreateDocumentAsync(app);
                 if (response.Result != Result.Error)
-                    _logger.LogDebug($"Added App ID {app.Id}");
+                    _logger.Log(Microsoft.Extensions.Logging.LogLevel.Debug, new EventId((int)LogEventId.General), $"Added App ID {app.Id}");
             }
         }
 

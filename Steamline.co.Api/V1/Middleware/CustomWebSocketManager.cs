@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Steamline.co.Api.V1.Helpers;
+using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Interfaces;
 using Steamline.co.Api.V1.Services.Websocket;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,10 +14,12 @@ namespace Steamline.co.Api.V1.Middleware
     public class CustomWebSocketManager
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<Player> _logger;
 
-        public CustomWebSocketManager(RequestDelegate next)
+        public CustomWebSocketManager(RequestDelegate next, ILogger<Player> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context, ICustomWebSocketFactory wsFactory, ICustomWebSocketMessageHandler wsmHandler)
@@ -40,7 +42,7 @@ namespace Steamline.co.Api.V1.Middleware
                             UserId = userId,
                         };
                         wsFactory.Add(userWebSocket);
-                        await wsmHandler.SendInitialMessages(userWebSocket);
+                        _logger.Log(LogLevel.Information, new EventId((int)LogEventId.User), $"User {userId} joined group {groupId}");
                         await Listen(context, userWebSocket, wsFactory, wsmHandler);
                     }
                 }
@@ -55,7 +57,7 @@ namespace Steamline.co.Api.V1.Middleware
         private async Task Listen(HttpContext context, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory, ICustomWebSocketMessageHandler wsmHandler)
         {
             var webSocket = userWebSocket.WebSocket;
-            var buffer = new byte[1024 * 4];
+            byte[] buffer = new byte[1024 * 4];
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             while (!result.CloseStatus.HasValue)
             {

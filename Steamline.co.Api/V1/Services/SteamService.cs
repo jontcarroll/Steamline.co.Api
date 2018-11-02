@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Steamline.co.Api.V1.Config;
+using Steamline.co.Api.V1.Helpers;
 using Steamline.co.Api.V1.Models;
 using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Interfaces;
@@ -214,7 +215,7 @@ namespace Steamline.co.Api.V1.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                _logger.Log(LogLevel.Error, new EventId((int)LogEventId.General), ex.ToString());
             }
             finally
             {
