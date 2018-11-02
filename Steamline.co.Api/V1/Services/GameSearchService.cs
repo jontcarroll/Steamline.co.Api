@@ -4,7 +4,6 @@ using Nest;
 using Steamline.co.Api.V1.Config;
 using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Utils;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,10 +40,10 @@ namespace Steamline.co.Api.V1.Services
             }
         }
 
-        public async Task<GameDetails> GetAsync(params long[] appIds)
+        public async Task<List<GameDetails>> GetAsync(params long[] appIds)
         {
             var response = await _client.SearchAsync<GameDetails>(x => x.Query(g => g.Ids(i => i.Values(appIds))));
-            return response.Documents.FirstOrDefault();
+            return response.Documents.ToList();
         }
 
         public async Task<List<GameDetails>> GetOldestAppDetailsAsync(int documentCount)

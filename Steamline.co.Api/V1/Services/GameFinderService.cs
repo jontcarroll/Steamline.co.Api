@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Steamline.co.Api.V1.Helpers;
 using Steamline.co.Api.V1.Models;
-using Steamline.co.Api.V1.Models.GameFinder;
 using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Interfaces;
 using Steamline.co.Api.V1.Services.Utils;
@@ -14,20 +12,27 @@ namespace Steamline.co.Api.V1.Services
 {
     public class GameFinderService : IGameFinderService
     {
-        private ILogger<GameFinderService> _logger;
-        private ISteamService _steamService;
+        private readonly ILogger<GameFinderService> _logger;
+        private readonly ISteamService _steamService;
+        private readonly GameSearchService _gameSearchService;
 
-        public GameFinderService(ILogger<GameFinderService> logger, ISteamService steamService)
+        public GameFinderService(ILogger<GameFinderService> logger, ISteamService steamService, GameSearchService gameSearchService)
         {
             _logger = logger;
             _steamService = steamService;
+            _gameSearchService = gameSearchService;
         }
 
         public async Task<IServiceResult<GameDetails, ApiErrorModel>> GetGameDetails(long appId)
         {
-            var gameDetails = SteamGames.GameDetails[appId] ?? await _steamService.GetGameDetailsAsync(appId);
+            var gameDetails = await _steamService.GetGameDetailsAsync(appId);
 
-            if (gameDetails == null)
+            if (gameDetails.HasError)
+            {
+                return gameDetails;
+            }
+
+            if (gameDetails.Value == null)
             {
                 return ServiceResultFactory.Error<GameDetails, ApiErrorModel>(new ApiErrorModel()
                 {
@@ -36,10 +41,10 @@ namespace Steamline.co.Api.V1.Services
                 });
             }
 
-            return ServiceResultFactory.Ok<GameDetails, ApiErrorModel>(gameDetails);
+            return ServiceResultFactory.Ok<GameDetails, ApiErrorModel>(gameDetails.Value);
         }
 
-        public async Task<IServiceResult<List<GameDetails>, ApiErrorModel>> GetGamesFromProfileUrl(string url)
+        public async Task<IServiceResult<List<GameDetails>, ApiErrorModel>> GetGamesFromProfileUrlAsync(string url)
         {
             string steamId = string.Empty;
             try
@@ -83,7 +88,7 @@ namespace Steamline.co.Api.V1.Services
                 return ServiceResultFactory.Error<List<GameDetails>, ApiErrorModel>(em);
             }
 
-            var returnValues = games.Select(g => SteamGames.GameDetails[g.AppId]).ToList();
+            var returnValues = await _gameSearchService.GetAsync(games.Select(g => g.AppId).ToArray());
 
 
             return ServiceResultFactory.Ok<List<GameDetails>, ApiErrorModel>(returnValues);

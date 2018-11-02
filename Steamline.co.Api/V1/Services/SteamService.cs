@@ -3,8 +3,10 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Steamline.co.Api.V1.Config;
+using Steamline.co.Api.V1.Models;
 using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Interfaces;
+using Steamline.co.Api.V1.Services.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,7 +73,7 @@ namespace Steamline.co.Api.V1.Services
             return gamesResponse?.Response?.Games ?? new List<Game>();
         }
 
-        public async Task<GameDetails> GetGameDetailsAsync(long appId)
+        public async Task<IServiceResult<GameDetails, ApiErrorModel>> GetGameDetailsAsync(long appId)
         {
             try
             {
@@ -79,11 +81,17 @@ namespace Steamline.co.Api.V1.Services
                 var response = (HttpWebResponse)await request.GetResponseAsync();
                 var reader = new StreamReader(response.GetResponseStream());
                 string jsonResponse = reader.ReadToEnd();
-                return JObject.Parse(jsonResponse).SelectToken(appId.ToString())?.SelectToken("data")?.ToObject<GameDetails>();
+                var gameDetails = JObject.Parse(jsonResponse).SelectToken(appId.ToString())?.SelectToken("data")?.ToObject<GameDetails>();
+                return ServiceResultFactory.Ok<GameDetails, ApiErrorModel>(gameDetails);
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                var em = new ApiErrorModel()
+                {
+                    Errors = new List<string>() { "Rate limited", ex.ToString() },
+                    Type = ApiErrorModel.TYPE_SERVER_ERROR
+                };
+                return ServiceResultFactory.Error<GameDetails, ApiErrorModel>(em);
             }
         }
 
@@ -133,7 +141,7 @@ namespace Steamline.co.Api.V1.Services
                 string storeLanguage = "en";
 
                 var steamRequest = GetSteamRequest(string.Format("http://store.steampowered.com/app/{0}/?l=" + storeLanguage, appId));
-                response = (HttpWebResponse)await steamRequest.GetResponseAsync();
+                response = await HandleRedirect(steamRequest);
 
                 int count = 0;
                 while (response.StatusCode == HttpStatusCode.Found && count < 5)
@@ -148,7 +156,7 @@ namespace Steamline.co.Api.V1.Services
                         return new List<string>();
 
                     steamRequest = GetSteamRequest(response.Headers[HttpResponseHeader.Location]);
-                    response = (HttpWebResponse)await steamRequest.GetResponseAsync();
+                    response = await HandleRedirect(steamRequest);
                     count++;
                 }
 
@@ -222,6 +230,21 @@ namespace Steamline.co.Api.V1.Services
                 return tags;
             }
             return new List<string>();
+        }
+
+        private static async Task<HttpWebResponse> HandleRedirect(HttpWebRequest steamRequest)
+        {
+            try
+            {
+                return (HttpWebResponse)await steamRequest.GetResponseAsync();
+            }
+            catch (WebException e)
+            {
+                if (e.Message.Contains("302"))
+                    return (HttpWebResponse)e.Response;
+                else
+                    throw;
+            }
         }
 
         private HttpWebRequest GetSteamRequest(string url)

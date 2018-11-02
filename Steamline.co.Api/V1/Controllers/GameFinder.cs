@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Steamline.co.Api.V1.Helpers;
 using Steamline.co.Api.V1.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Steamline.co.Api.V1.Models;
+using System.Threading.Tasks;
 
 namespace Steamline.co.Api.V1.Controllers
 {
@@ -15,15 +9,16 @@ namespace Steamline.co.Api.V1.Controllers
     [Route("api/v{version:apiVersion}/gamefinder")]
     public class GameFinder : Controller
     {
-        IGameFinderService _gameFinderService;
-        public GameFinder(IGameFinderService gameFinderService) {
+        private IGameFinderService _gameFinderService;
+        public GameFinder(IGameFinderService gameFinderService)
+        {
             _gameFinderService = gameFinderService;
         }
 
         [HttpGet("{groupCode}/{url}")]
         public async Task<ServiceActionResult> GetGamesFromProfileUrl(string url)
         {
-            var result = await _gameFinderService.GetGamesFromProfileUrl(url);
+            var result = await _gameFinderService.GetGamesFromProfileUrlAsync(url);
             return ServiceActionResultFactory.Create(result);
         }
 

@@ -1,32 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-
-using Steamline.co.Api.V1.Services.Interfaces;
-using Steamline.co.Api.V1.Services;
-using Steamline.co.Api.V1.Services.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using Steamline.co.Api.V1.Middleware.Extensions;
-using Steamline.co.Api.V1.Filters;
-using Steamline.co.Api.V1.Services.Utils;
 using Steamline.co.Api.V1.Config;
-using System.Net.WebSockets;
-using System.Threading;
-using Steamline.co.Api.V1.Services.Websocket;
-using Steamline.co.Api.V1.Middleware;
+using Steamline.co.Api.V1.Filters;
+using Steamline.co.Api.V1.Middleware.Extensions;
+using Steamline.co.Api.V1.Services;
+using Steamline.co.Api.V1.Services.Interfaces;
 using Steamline.co.Api.V1.Services.ScheduledTasks;
+using Steamline.co.Api.V1.Services.Utils;
+using Steamline.co.Api.V1.Services.Websocket;
+using System;
 
 namespace Steamline.co.Api
 {
@@ -42,7 +28,8 @@ namespace Steamline.co.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(options => {
+            services.AddMvc(options =>
+            {
                 options.Filters.Add(typeof(ModelValidationActionFilter));
             });
             services.AddCors(options =>
@@ -76,7 +63,7 @@ namespace Steamline.co.Api
 
             // Only created when server starts
             services.AddSingleton<IWorkerQueue, WorkerQueue>();
-  
+
 
             // Hosted Services (Can be used for generating group IDs to prevent issues with back to back code generation)
             services.AddHostedService<WorkerQueueHostedService>();
@@ -89,20 +76,25 @@ namespace Steamline.co.Api
             services.AddSingleton<ICustomWebSocketFactory, CustomWebSocketFactory>();
             services.AddSingleton<ICustomWebSocketMessageHandler, CustomWebSocketMessageHandler>();
 
-            services.AddAuthorization(options => {
-                options.AddPolicy("SignedIn", p => {
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("SignedIn", p =>
+                {
                     p.RequireClaim("signedin");
                 });
             });
 
-            var signingKeyBase64 = Configuration.GetValue<string>("JwtOptions:SigningKey");
+            string signingKeyBase64 = Configuration.GetValue<string>("JwtOptions:SigningKey");
             var key = new SymmetricSecurityKey(Convert.FromBase64String(signingKeyBase64));
-            services.AddAuthentication(options => {
+            services.AddAuthentication(options =>
+            {
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options => {
+            }).AddJwtBearer(options =>
+            {
                 options.SaveToken = true;
 
-                options.TokenValidationParameters = new TokenValidationParameters() {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
                     RequireExpirationTime = true,
                     RequireSignedTokens = true,
                     ValidateIssuerSigningKey = true,
@@ -112,7 +104,7 @@ namespace Steamline.co.Api
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
-            }); 
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

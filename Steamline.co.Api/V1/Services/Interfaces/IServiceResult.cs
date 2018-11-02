@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 
 namespace Steamline.co.Api.V1.Services.Interfaces
@@ -6,7 +5,7 @@ namespace Steamline.co.Api.V1.Services.Interfaces
     public interface IServiceResult<ErrorModel>
     {
         bool IsOk { get; }
-        bool HasError { get; } 
+        bool HasError { get; }
         bool NotFound { get; }
 
         ErrorModel Error { get; }
@@ -20,6 +19,6 @@ namespace Steamline.co.Api.V1.Services.Interfaces
     public interface IFileServiceResult<ErrorModel> : IServiceResult<ErrorModel>
     {
         Stream Value { get; }
-        String MimeType { get; }
+        string MimeType { get; }
     }
 }

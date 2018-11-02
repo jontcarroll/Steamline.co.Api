@@ -23,7 +23,7 @@ namespace Steamline.co.Api
         {
             Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .WriteTo.File(Path.Combine(Environment.CurrentDirectory, "SteamLineLog.txt"), rollingInterval: RollingInterval.Day)
+                .WriteTo.File(Path.Combine(Environment.CurrentDirectory, "bin", "SteamLineLog.txt"), rollingInterval: RollingInterval.Day)
                 .Enrich.FromLogContext()
                 .CreateLogger();
 

@@ -1,9 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Nest;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Nest;
 
 namespace Steamline.co.Api.V1.Models.SteamApi
 {

@@ -1,6 +1,5 @@
-using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Steamline.co.Api.V1.Models
 {
@@ -10,6 +9,7 @@ namespace Steamline.co.Api.V1.Models
         public const string TYPE_TOAST_ERROR = "toasterror";
         public const string TYPE_SILENT_ERROR = "silenterror";
         public const string TYPE_VALIDATION = "validation";
+        public const string TYPE_SERVER_ERROR = "servererror";
 
         public ApiErrorModel()
         {

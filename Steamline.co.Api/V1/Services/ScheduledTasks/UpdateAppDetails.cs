@@ -1,4 +1,5 @@
-﻿using Steamline.co.Api.V1.Services.Interfaces;
+﻿using Steamline.co.Api.V1.Models;
+using Steamline.co.Api.V1.Services.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,9 +24,16 @@ namespace Steamline.co.Api.V1.Services.ScheduledTasks
 
             foreach (var game in documents)
             {
-                var details = await _steamService.GetGameDetailsAsync(game.Id);
-                if (details == null)
-                    continue;
+                var detailResponse = await _steamService.GetGameDetailsAsync(game.Id);
+                if (detailResponse.HasError)
+                {
+                    if (detailResponse.Error.Type == ApiErrorModel.TYPE_SERVER_ERROR)
+                        break;
+                    else
+                        continue;
+                }
+
+                var details = detailResponse.Value ?? game;
 
                 if (details.Type == "game")
                 {
