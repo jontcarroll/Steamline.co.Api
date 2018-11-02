@@ -146,7 +146,6 @@ namespace Steamline.co.Api.V1.Services
                 int count = 0;
                 while (response.StatusCode == HttpStatusCode.Found && count < 5)
                 {
-                    response.Close();
                     // If we are redirected to the store front page
                     if (response.Headers[HttpResponseHeader.Location] == "http://store.steampowered.com/")
                         return new List<string>();
