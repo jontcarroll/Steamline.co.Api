@@ -119,9 +119,9 @@ namespace Steamline.co.Api
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseAuthentication();
+            app.UseMvc();
             app.UseWebSockets();
             app.UseCustomWebSocketManager();
-            app.UseMvc();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Steamline.co.Api.V1.Services.Interfaces;
 using System;
 using System.Net.WebSockets;
@@ -44,10 +45,13 @@ namespace Steamline.co.Api.V1.Services.Websocket
 
         public async Task HandleMessageAsync(WebSocketReceiveResult result, byte[] buffer, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory)
         {
-            var msg = Encoding.ASCII.GetString(buffer).TrimEnd('\0');
+            userWebSocket.PreviousMessage += Encoding.ASCII.GetString(buffer).TrimEnd('\0');
             try
             {
-                var incomingMessage = JsonConvert.DeserializeObject<IncomingWebSocketMessageWrapper>(msg);
+                var incomingMessage = JsonConvert.DeserializeObject<IncomingWebSocketMessageWrapper>(userWebSocket.PreviousMessage);
+                // If serialization succeeds, reset PreviousMessage
+                // Otherwise, we received a partial message, so the following messages on this websocket should have the rest of the message
+                userWebSocket.PreviousMessage = string.Empty;
 
                 var message = new CustomWebSocketMessage()
                 {
@@ -58,13 +62,13 @@ namespace Steamline.co.Api.V1.Services.Websocket
                     WebSocketMessageType = incomingMessage.WebSocketMessageType,
                 };
 
-                var output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(message));
+                byte[] output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(message));
 
                 await BroadcastInGroupAsync(output, userWebSocket, wsFactory);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                await userWebSocket.WebSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                
             }
         }
 

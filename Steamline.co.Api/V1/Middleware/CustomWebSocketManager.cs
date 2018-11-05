@@ -58,12 +58,12 @@ namespace Steamline.co.Api.V1.Middleware
         private async Task ListenAsync(HttpContext context, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory, ICustomWebSocketMessageHandler wsmHandler)
         {
             var webSocket = userWebSocket.WebSocket;
-            byte[] buffer = new byte[1024 * 4];
+            byte[] buffer = new byte[1024 * 16];
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             while (!result.CloseStatus.HasValue)
             {
                 await wsmHandler.HandleMessageAsync(result, buffer, userWebSocket, wsFactory);
-                buffer = new byte[1024 * 4];
+                buffer = new byte[1024 * 16];
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
             await wsmHandler.SendDisconnectMessageAsync(userWebSocket, wsFactory);
