@@ -5,6 +5,8 @@ using Steamline.co.Api.V1.Models.SteamApi;
 using Steamline.co.Api.V1.Services.Interfaces;
 using Steamline.co.Api.V1.Services.Websocket;
 using System;
+using System.Collections.Generic;
+using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -55,20 +57,40 @@ namespace Steamline.co.Api.V1.Middleware
             await _nextAsync(context);
         }
 
+        async Task<(WebSocketReceiveResult, IEnumerable<byte>)> ReceiveFullMessage(WebSocket socket, CancellationToken cancelToken)
+        {
+            WebSocketReceiveResult response;
+            var message = new List<byte>();
+
+            var buffer = new byte[4096];
+            do
+            {
+                response = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), cancelToken);
+                message.AddRange(new ArraySegment<byte>(buffer, 0, response.Count));
+            } while (!response.EndOfMessage);
+
+            return (response, message);
+        }
+
         private async Task ListenAsync(HttpContext context, CustomWebSocket userWebSocket, ICustomWebSocketFactory wsFactory, ICustomWebSocketMessageHandler wsmHandler)
         {
             var webSocket = userWebSocket.WebSocket;
             byte[] buffer = new byte[1024 * 16];
-            var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            while (!result.CloseStatus.HasValue)
+            var message = new List<byte>();
+            WebSocketReceiveResult response;
+            do
             {
-                await wsmHandler.HandleMessageAsync(result, buffer, userWebSocket, wsFactory);
-                buffer = new byte[1024 * 16];
-                result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            }
+                do
+                {
+                    response = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    message.AddRange(new ArraySegment<byte>(buffer, 0, response.Count));
+                } while (!response.EndOfMessage);
+                await wsmHandler.HandleMessageAsync(response, message, userWebSocket, wsFactory);
+            } while (!response.CloseStatus.HasValue);
+
             await wsmHandler.SendDisconnectMessageAsync(userWebSocket, wsFactory);
             wsFactory.Remove(userWebSocket.GroupId, userWebSocket.UserId);
-            await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+            await webSocket.CloseAsync(response.CloseStatus.Value, response.CloseStatusDescription, CancellationToken.None);
         }
     }
 }

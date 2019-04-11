@@ -12,6 +12,5 @@ namespace Steamline.co.Api.V1.Services.Websocket
         public string UserId { get; set; }
         public string FriendlyName { get; set; }
         public Guid GroupId { get; set; }
-        public string PreviousMessage { get; set; } = string.Empty;
     }
 }
